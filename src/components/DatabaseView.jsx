@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { statusClass, formatPercent } from '../utils.js';
 import CandidateDetail from './CandidateDetail.jsx';
 
-export default function DatabaseView({ tracker, initialSelectedName, onClearInitialSelection }) {
+export default function DatabaseView({ tracker, initialSelectedName, onClearInitialSelection, token, refreshData }) {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
 
@@ -32,14 +32,12 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
         <h1>Database Tracker</h1>
         <p>Seluruh data identitas, tim asesor, dan hasil triangulasi per kandidat.</p>
       </div>
-
       <input
         className="table-search"
         placeholder="Cari nama, fakultas, atau proyeksi amanah…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-
       <table className="data-table">
         <thead>
           <tr>
@@ -62,22 +60,23 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
               <td>{row['Proyeksi Amanah']}</td>
               <td>{row['Asesor Utama (Sospol)']}</td>
               <td>
-                <span className={`status-pill ${statusClass(row['Status Asesmen'])}`}>
-                  {row['Status Asesmen']}
-                </span>
+                <span className={`status-pill ${statusClass(row['Status Asesmen'])}`}>{row['Status Asesmen']}</span>
               </td>
               <td>{formatPercent(row['Progres (%)'])}</td>
               <td>
-                <button className="link-btn" onClick={() => setSelected(row)}>
-                  Lihat detail
-                </button>
+                <button className="link-btn" onClick={() => setSelected(row)}>Lihat detail</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <CandidateDetail candidate={selected} onClose={() => setSelected(null)} />
+      <CandidateDetail 
+        candidate={selected} 
+        onClose={() => setSelected(null)} 
+        token={token} 
+        refreshData={refreshData}
+      />
     </div>
   );
 }
