@@ -32,12 +32,14 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
         <h1>Database Tracker</h1>
         <p>Seluruh data identitas, tim asesor, dan hasil triangulasi per kandidat.</p>
       </div>
+
       <input
         className="table-search"
         placeholder="Cari nama, fakultas, atau proyeksi amanah…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
+
       <table className="data-table">
         <thead>
           <tr>
@@ -55,16 +57,29 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
           {filtered.map((row) => (
             <tr key={row['No']}>
               <td>{row['No']}</td>
-              <td className="row-name">{row['Nama Lengkap']}</td>
+              <td>
+                {/* Bagian ini diubah menjadi tombol yang bisa diklik */}
+                <button 
+                  className="link-btn row-name" 
+                  onClick={() => setSelected(row)}
+                  style={{ textAlign: 'left' }}
+                >
+                  {row['Nama Lengkap']}
+                </button>
+              </td>
               <td>{row['Fakultas']}</td>
               <td>{row['Proyeksi Amanah']}</td>
               <td>{row['Asesor Utama (Sospol)']}</td>
               <td>
-                <span className={`status-pill ${statusClass(row['Status Asesmen'])}`}>{row['Status Asesmen']}</span>
+                <span className={`status-pill ${statusClass(row['Status Asesmen'])}`}>
+                  {row['Status Asesmen']}
+                </span>
               </td>
               <td>{formatPercent(row['Progres (%)'])}</td>
               <td>
-                <button className="link-btn" onClick={() => setSelected(row)}>Lihat detail</button>
+                <button className="link-btn" onClick={() => setSelected(row)}>
+                  Lihat detail
+                </button>
               </td>
             </tr>
           ))}
@@ -75,7 +90,7 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
         candidate={selected} 
         onClose={() => setSelected(null)} 
         token={token} 
-        refreshData={refreshData}
+        refreshData={refreshData} 
       />
     </div>
   );
