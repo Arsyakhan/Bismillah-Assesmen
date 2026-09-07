@@ -4,10 +4,9 @@ if (!BASE_URL) {
   console.warn('VITE_APPS_SCRIPT_URL belum diatur.');
 }
 
-async function callApi(params, method = 'GET', body = null) {
-  const url = new URL(BASE_URL);
-  
+async function callApi(params, method = 'GET', postData = null) {
   if (method === 'GET') {
+    const url = new URL(BASE_URL);
     Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
     
     const res = await fetch(url.toString());
@@ -18,13 +17,15 @@ async function callApi(params, method = 'GET', body = null) {
   }
 
   if (method === 'POST') {
-    // JURUS ANTI-CORS: Gunakan text/plain
+    // JURUS ANTI-CORS: Menggunakan URLSearchParams (Format asli Form)
+    const formData = new URLSearchParams();
+    Object.entries(postData).forEach(([key, value]) => {
+      formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+    });
+
     const res = await fetch(BASE_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      },
-      body: JSON.stringify(body)
+      body: formData // Otomatis diset ke application/x-www-form-urlencoded (Aman dari blokir)
     });
     
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
@@ -42,7 +43,6 @@ export function fetchData(token) {
   return callApi({ action: 'data', token });
 }
 
-// Format pemanggilan Update yang baru
 export function updateDataToSheet(token, sheetName, keyColumn, keyValue, updateData) {
   return callApi({}, 'POST', { 
     action: 'update', 
