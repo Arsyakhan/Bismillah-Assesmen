@@ -8,7 +8,6 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // Masukkan SEMUA data kandidat ke form saat modal dibuka
   useEffect(() => {
     if (candidate) {
       setFormData({ ...candidate });
@@ -29,8 +28,11 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Menyimpan seluruh form data ke Spreadsheet
-      await updateDataToSheet(token, 'Database_Tracker', 'No', candidate['No'], formData);
+      // PENTING: Jangan ikutkan Progres agar tidak menimpa rumus/formula di Spreadsheet
+      const dataToSave = { ...formData };
+      delete dataToSave['Progres (%)'];
+
+      await updateDataToSheet(token, 'Database_Tracker', 'No', candidate['No'], dataToSave);
       setIsEditing(false);
       if (refreshData) refreshData();
     } catch (err) {
@@ -65,8 +67,8 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
                 </select>
               </div>
               <div>
-                <div className="drawer-field-label">Progres (%)</div>
-                <input name="Progres (%)" value={formData["Progres (%)"] || ''} onChange={handleChange} placeholder="50%" style={{ padding: '8px 10px', borderRadius: '3px', border: '1px solid var(--line)', fontSize: '13.5px', width: '80px', background: 'var(--paper-card)' }} />
+                <div className="drawer-field-label">Progres (Otomatis)</div>
+                <div className="drawer-field-value" style={{ padding: '8px 0' }}>{formatPercent(candidate['Progres (%)'])}</div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
                 <button onClick={handleSave} disabled={isSaving} style={{ background: 'var(--navy)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '3px', fontSize: '13.5px', fontWeight: 600 }}>
@@ -118,7 +120,6 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
 }
 
 function Field({ label, value, isEditing, onChange }) {
-  // Jika mode edit aktif, ubah teks menjadi form input textarea
   if (isEditing) {
     return (
       <div className="drawer-field">
@@ -144,7 +145,6 @@ function Field({ label, value, isEditing, onChange }) {
     );
   }
 
-  // Jika mode baca (default), tampilkan teks biasa
   const hasValue = value !== undefined && value !== null && String(value).trim() !== '';
   return (
     <div className="drawer-field">
