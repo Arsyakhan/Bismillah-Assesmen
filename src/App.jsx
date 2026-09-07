@@ -14,19 +14,32 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [pendingCandidateName, setPendingCandidateName] = useState(null);
 
-  useEffect(() => {
+  const loadData = () => {
     if (!token) return;
-    setLoading(true);
-    setError('');
     fetchData(token)
       .then((res) => setData(res.data))
       .catch((err) => {
         setError(err.message);
-        if (err.message.toLowerCase().includes('sesi')) {
-          handleLogout();
-        }
+        if (err.message.toLowerCase().includes('sesi')) handleLogout();
+      });
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    setLoading(true);
+    setError('');
+    
+    fetchData(token)
+      .then((res) => setData(res.data))
+      .catch((err) => {
+        setError(err.message);
+        if (err.message.toLowerCase().includes('sesi')) handleLogout();
       })
       .finally(() => setLoading(false));
+
+    // Auto-refresh dari Spreadsheet setiap 10 detik
+    const intervalId = setInterval(loadData, 10000);
+    return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
@@ -36,21 +49,15 @@ export default function App() {
     setData(null);
   }
 
-  if (!token) {
-    return <Login onSuccess={setToken} />;
-  }
+  if (!token) return <Login onSuccess={setToken} />;
 
   return (
     <div className="app-shell">
-      <Sidebar
-        active={page}
-        onNavigate={setPage}
-        onLogout={handleLogout}
-      />
+      <Sidebar active={page} onNavigate={setPage} onLogout={handleLogout} />
       <main className="main">
-        {loading && <p className="state-message">Memuat data…</p>}
+        {loading && !data && <p className="state-message">Memuat data…</p>}
         {error && <p className="state-message">{error}</p>}
-        {data && !loading && (
+        {data && (
           <>
             {page === 'dashboard' && (
               <DashboardView
@@ -66,6 +73,8 @@ export default function App() {
                 tracker={data.tracker}
                 initialSelectedName={pendingCandidateName}
                 onClearInitialSelection={() => setPendingCandidateName(null)}
+                token={token}
+                refreshData={loadData}
               />
             )}
             {page === 'allocation' && <AllocationView allocation={data.allocation} />}
