@@ -29,6 +29,7 @@ export default function App() {
     setLoading(true);
     setError('');
     
+    // Tarikan pertama saat web dibuka
     fetchData(token)
       .then((res) => setData(res.data))
       .catch((err) => {
@@ -37,8 +38,9 @@ export default function App() {
       })
       .finally(() => setLoading(false));
 
-    // Auto-refresh dari Spreadsheet setiap 10 detik
-    const intervalId = setInterval(loadData, 10000);
+    // SOLUSI 404: Auto-refresh diperlambat menjadi 2 Menit (120000 ms) 
+    // agar tidak menumpuk dan membuat URL Google expired.
+    const intervalId = setInterval(loadData, 120000);
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
