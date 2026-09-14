@@ -520,3 +520,58 @@ button {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ---------- Format Print PDF (A4) ---------- */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  
+  body {
+    background: white !important;
+  }
+
+  /* Menyembunyikan sidebar dan tabel utama agar hanya detail kandidat yang ter-print */
+  .sidebar,
+  .page-header,
+  .table-search,
+  .data-table,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Menarik detail kandidat agar memenuhi halaman A4 penuh */
+  .drawer-overlay {
+    position: absolute;
+    inset: 0;
+    background: white !important;
+    display: block;
+    z-index: 9999;
+  }
+
+  .drawer.print-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Mencegah kartu (box) terpotong setengah jika berada di ujung bawah halaman kertas */
+  .print-field {
+    break-inside: avoid; 
+    border: 1px solid #ddd !important;
+  }
+  
+  .drawer-group-title {
+    color: black !important;
+    border-bottom: 2px solid #ccc !important;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
