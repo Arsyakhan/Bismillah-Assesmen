@@ -5,7 +5,7 @@ export default function Login({ onSuccess }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State untuk kontrol ikon mata
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,8 +32,8 @@ export default function Login({ onSuccess }) {
         <form onSubmit={handleSubmit}>
           <label htmlFor="password">Password tim</label>
           
-          {/* Wrapper relatif agar posisi ikon mata bisa menyatu di dalam input */}
-          <div style={{ position: 'relative', marginBottom: '18px' }}>
+          {/* Pembungkus yang sudah diatur ulang agar presisi 100% width */}
+          <div style={{ position: 'relative', display: 'block', width: '100%', marginBottom: '18px' }}>
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
@@ -41,10 +41,14 @@ export default function Login({ onSuccess }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Masukkan password"
-              style={{ width: '100%', marginBottom: 0, paddingRight: '40px' }} 
+              style={{ 
+                width: '100%', 
+                marginBottom: '0', /* Memindahkan margin ke pembungkus */
+                paddingRight: '45px', /* Memberikan ruang lega di kanan agar teks tidak menabrak ikon */
+                boxSizing: 'border-box'
+              }} 
             />
             
-            {/* Tombol Ikon Mata */}
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -56,11 +60,13 @@ export default function Login({ onSuccess }) {
                 transform: 'translateY(-50%)',
                 background: 'transparent',
                 border: 'none',
-                padding: 0,
+                padding: '4px',
                 color: 'var(--ink-soft)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 10
               }}
             >
               {showPassword ? (
