@@ -32,7 +32,6 @@ export default function Login({ onSuccess }) {
         <form onSubmit={handleSubmit}>
           <label htmlFor="password">Password tim</label>
           
-          {/* Pembungkus yang sudah diatur ulang agar presisi 100% width */}
           <div style={{ position: 'relative', display: 'block', width: '100%', marginBottom: '18px' }}>
             <input
               id="password"
@@ -43,8 +42,8 @@ export default function Login({ onSuccess }) {
               placeholder="Masukkan password"
               style={{ 
                 width: '100%', 
-                marginBottom: '0', /* Memindahkan margin ke pembungkus */
-                paddingRight: '45px', /* Memberikan ruang lega di kanan agar teks tidak menabrak ikon */
+                marginBottom: '0', 
+                paddingRight: '45px', 
                 boxSizing: 'border-box'
               }} 
             />
@@ -61,6 +60,8 @@ export default function Login({ onSuccess }) {
                 background: 'transparent',
                 border: 'none',
                 padding: '4px',
+                width: 'auto',      /* INI KUNCINYA: Mencegah tombol dipaksa 100% oleh CSS */
+                minWidth: 'auto',
                 color: 'var(--ink-soft)',
                 display: 'flex',
                 alignItems: 'center',
