@@ -5,6 +5,14 @@ export default function DashboardView({ dashboard, onSelectCandidate }) {
   if (!dashboard) return null;
   const { stats, candidates } = dashboard;
 
+  // Fungsi untuk mengubah status otomatis berdasarkan angka progres
+  const getDynamicStatus = (progres) => {
+    const val = Number(progres) || 0;
+    if (val >= 1) return "Selesai";
+    if (val > 0) return "Sedang Berjalan";
+    return "Belum Mulai";
+  };
+
   return (
     <div>
       <div className="page-header">
@@ -52,26 +60,39 @@ export default function DashboardView({ dashboard, onSelectCandidate }) {
             </tr>
           </thead>
           <tbody>
-            {candidates.map((c) => (
-              <tr key={c.no}>
-                <td>{c.no}</td>
-                <td>
-                  <button className="link-btn" onClick={() => onSelectCandidate(c.nama)}>
-                    {c.nama}
-                  </button>
-                </td>
-                <td>{c.fakultas}</td>
-                <td>{c.proyeksiAmanah}</td>
-                <td>
-                  <span className={`status-pill ${statusClass(c.statusAsesmen)}`}>{c.statusAsesmen}</span>
-                </td>
-                <td style={{ minWidth: 140 }}>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: formatPercent(c.progres) }} />
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {candidates.map((c) => {
+              // Menentukan status dinamis berdasarkan persentase
+              const dynamicStatus = getDynamicStatus(c.progres);
+              
+              return (
+                <tr key={c.no}>
+                  <td>{c.no}</td>
+                  <td>
+                    <button className="link-btn" onClick={() => onSelectCandidate(c.nama)}>
+                      {c.nama}
+                    </button>
+                  </td>
+                  <td>{c.fakultas}</td>
+                  <td>{c.proyeksiAmanah}</td>
+                  <td>
+                    <span className={`status-pill ${statusClass(dynamicStatus)}`}>
+                      {dynamicStatus}
+                    </span>
+                  </td>
+                  {/* Kolom progres dimodifikasi agar menampilkan teks % di samping bar */}
+                  <td style={{ minWidth: 180 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div className="progress-track" style={{ flex: 1 }}>
+                        <div className="progress-fill" style={{ width: formatPercent(c.progres) }} />
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: '600', minWidth: '40px', color: 'var(--navy)' }}>
+                        {formatPercent(c.progres)}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
