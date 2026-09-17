@@ -28,7 +28,7 @@ export default function App() {
     if (!token) return;
     setLoading(true);
     setError('');
-    
+
     // Tarikan pertama saat web dibuka
     fetchData(token)
       .then((res) => setData(res.data))
@@ -38,7 +38,7 @@ export default function App() {
       })
       .finally(() => setLoading(false));
 
-    // SOLUSI 404: Auto-refresh diperlambat menjadi 2 Menit (120000 ms) 
+    // SOLUSI 404: Auto-refresh diperlambat menjadi 2 Menit (120000 ms)
     // agar tidak menumpuk dan membuat URL Google expired.
     const intervalId = setInterval(loadData, 120000);
     return () => clearInterval(intervalId);
@@ -47,6 +47,7 @@ export default function App() {
 
   function handleLogout() {
     sessionStorage.removeItem('ltk_token');
+    sessionStorage.removeItem('ltk_editor_name');
     setToken(null);
     setData(null);
   }
