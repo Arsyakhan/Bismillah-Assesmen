@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { login } from '../api.js';
 
 export default function Login({ onSuccess }) {
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,6 +15,7 @@ export default function Login({ onSuccess }) {
     try {
       const result = await login(password);
       sessionStorage.setItem('ltk_token', result.token);
+      sessionStorage.setItem('ltk_editor_name', name.trim());
       onSuccess(result.token);
     } catch (err) {
       setError(err.message);
@@ -28,46 +30,44 @@ export default function Login({ onSuccess }) {
         <p className="login-mark">LTK UI 2027</p>
         <h1>Masuk ke Tracker Asesmen</h1>
         {error && <div className="login-error">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
+          <label htmlFor="name">Nama kamu</label>
+          <input
+            id="name"
+            type="text"
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nama asesor (untuk catatan siapa yang mengedit)"
+            required
+            style={{ width: '100%', marginBottom: '18px', boxSizing: 'border-box' }}
+          />
+
           <label htmlFor="password">Password tim</label>
-          
           <div style={{ position: 'relative', display: 'block', width: '100%', marginBottom: '18px' }}>
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Masukkan password"
-              style={{ 
-                width: '100%', 
-                marginBottom: '0', 
-                paddingRight: '45px', 
+              style={{
+                width: '100%',
+                marginBottom: '0',
+                paddingRight: '45px',
                 boxSizing: 'border-box'
-              }} 
+              }}
             />
-            
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               title={showPassword ? "Sembunyikan password" : "Tampilkan password"}
               style={{
-                position: 'absolute',
-                right: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'transparent',
-                border: 'none',
-                padding: '4px',
-                width: 'auto',      /* INI KUNCINYA: Mencegah tombol dipaksa 100% oleh CSS */
-                minWidth: 'auto',
-                color: 'var(--ink-soft)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                zIndex: 10
+                position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                background: 'transparent', border: 'none', padding: '4px', width: 'auto', minWidth: 'auto',
+                color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', zIndex: 10
               }}
             >
               {showPassword ? (
@@ -84,7 +84,7 @@ export default function Login({ onSuccess }) {
             </button>
           </div>
 
-          <button type="submit" disabled={loading || !password}>
+          <button type="submit" disabled={loading || !password || !name.trim()}>
             {loading ? 'Memeriksa…' : 'Masuk'}
           </button>
         </form>
