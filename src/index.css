@@ -400,6 +400,60 @@ button {
   text-decoration: underline;
 }
 
+/* ---------- Buttons (dipakai di drawer & tempat lain) ---------- */
+
+.btn {
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s;
+  padding: 10px 20px;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--navy-deep);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink-soft);
+}
+
+.btn-outline:hover {
+  background: var(--navy-tint);
+}
+
+.btn-ghost {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-ghost:hover {
+  background: var(--navy-tint);
+}
+
 /* ---------- Detail drawer ---------- */
 
 .drawer-overlay {
@@ -420,30 +474,125 @@ button {
   box-shadow: -12px 0 40px rgba(0, 0, 0, 0.2);
 }
 
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.drawer-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .drawer-close {
-  background: none;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 6px 10px;
-  font-size: 13px;
-  color: var(--ink-soft);
-  float: right;
+  background: transparent;
 }
 
 .drawer h2 {
   font-family: var(--font-display);
-  font-size: 22px;
-  margin: 0 0 2px;
+  font-size: 26px;
+  margin: 0 0 6px;
+  color: var(--navy-deep);
 }
 
 .drawer .drawer-sub {
   color: var(--ink-soft);
-  font-size: 13.5px;
-  margin-bottom: 24px;
+  font-size: 14.5px;
+  margin: 0 0 24px;
+}
+
+.drawer-status-box {
+  background: var(--navy-tint);
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 32px;
+  border: 1px solid var(--line);
+}
+
+.drawer-status-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.drawer-status-group {
+  display: flex;
+  gap: 40px;
+}
+
+.drawer-status-edit-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.drawer-status-field {
+  flex: 1;
+  min-width: 150px;
+}
+
+.drawer-status-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.drawer-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  font-size: 14px;
+  background: var(--paper-card);
+}
+
+.drawer-status-pill-lg {
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+.drawer-status-value-lg {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.drawer-status-value-md {
+  padding: 10px 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.print-group {
+  margin-bottom: 36px;
+}
+
+.drawer-group-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy-deep);
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 8px;
+  margin: 0 0 20px;
 }
 
 .drawer-field {
-  margin-bottom: 18px;
+  margin-bottom: 0;
 }
 
 .drawer-field-label {
@@ -467,19 +616,147 @@ button {
   font-style: italic;
 }
 
-.drawer-group-title {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
-  margin: 28px 0 14px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
+.field-card {
+  background: var(--paper-card);
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  break-inside: avoid;
 }
 
-.drawer-group-title:first-of-type {
-  border-top: none;
-  padding-top: 0;
-  margin-top: 0;
+.field-card .drawer-field-label {
+  margin-bottom: 10px;
+}
+
+.field-card .drawer-field-value {
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.field-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-card);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* ---------- Dashboard charts ---------- */
+
+.chart-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.chart-card {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+.chart-card h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: var(--navy-deep);
+}
+
+.donut-chart-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.donut-center-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  fill: var(--navy);
+}
+
+.donut-center-label {
+  font-size: 9px;
+  fill: var(--ink-soft);
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.donut-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.donut-legend-count {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.faculty-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faculty-bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 24px;
+  align-items: center;
+  gap: 12px;
+}
+
+.faculty-bar-label {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.faculty-bar-track {
+  height: 10px;
+  background: var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.faculty-bar-fill {
+  height: 100%;
+  background: var(--navy);
+  border-radius: 5px;
+}
+
+.faculty-bar-count {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--navy);
 }
 
 /* ---------- Loading / error ---------- */
@@ -519,6 +796,9 @@ button {
   .stat-row {
     grid-template-columns: repeat(2, 1fr);
   }
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- Format Print PDF (A4) ---------- */
@@ -527,7 +807,7 @@ button {
     size: A4 portrait;
     margin: 12mm;
   }
-  
+
   body {
     background: white !important;
   }
@@ -537,6 +817,8 @@ button {
   .page-header,
   .table-search,
   .data-table,
+  .stat-row,
+  .chart-row,
   .no-print {
     display: none !important;
   }
@@ -561,15 +843,15 @@ button {
 
   /* Mencegah kartu (box) terpotong setengah jika berada di ujung bawah halaman kertas */
   .print-field {
-    break-inside: avoid; 
+    break-inside: avoid;
     border: 1px solid #ddd !important;
   }
-  
+
   .drawer-group-title {
     color: black !important;
     border-bottom: 2px solid #ccc !important;
   }
-  
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
