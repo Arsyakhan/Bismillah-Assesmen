@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { FIELD_GROUPS } from '../fieldGroups.js';
 import { statusClass, formatPercent } from '../utils.js';
 import { updateDataToSheet } from '../api.js';
+import Toast from './Toast.jsx';
 
 export default function CandidateDetail({ candidate, onClose, token, refreshData }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (candidate) {
@@ -24,12 +26,13 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
     setIsSaving(true);
     try {
       const dataToSave = { ...formData };
-      delete dataToSave['Progres (%)']; // Jaga rumus otomatis
+      delete dataToSave['Progres (%)'];
       await updateDataToSheet(token, 'Database_Tracker', 'No', candidate['No'], dataToSave);
       setIsEditing(false);
+      setToast({ type: 'success', message: 'Perubahan berhasil disimpan.' });
       if (refreshData) refreshData();
     } catch (err) {
-      alert("Gagal menyimpan: " + err.message);
+      setToast({ type: 'error', message: 'Gagal menyimpan: ' + err.message });
     } finally {
       setIsSaving(false);
     }
@@ -41,7 +44,6 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer print-container" onClick={(e) => e.stopPropagation()}>
 
-        {/* Header Title & Actions */}
         <div className="drawer-header">
           <div>
             <h2>{candidate['Nama Lengkap']}</h2>
@@ -60,7 +62,6 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
           </div>
         </div>
 
-        {/* Status & Progress Box */}
         <div className="drawer-status-box">
           {isEditing ? (
             <div className="drawer-status-edit-row">
@@ -117,7 +118,6 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
           )}
         </div>
 
-        {/* Field Groups */}
         <div className="drawer-content">
           {FIELD_GROUPS.map((group) => (
             <div key={group.title} className="print-group">
@@ -137,6 +137,8 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
           ))}
         </div>
       </div>
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }
