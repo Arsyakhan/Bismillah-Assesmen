@@ -54,13 +54,12 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
           </tr>
         </thead>
         <tbody>
-          {filtered.map((row) => (
-            <tr key={row['No']}>
+          {filtered.map((row, i) => (
+            <tr key={row['No']} className="row-enter" style={{ animationDelay: `${Math.min(i * 20, 300)}ms` }}>
               <td>{row['No']}</td>
               <td>
-                {/* Bagian ini diubah menjadi tombol yang bisa diklik */}
-                <button 
-                  className="link-btn row-name" 
+                <button
+                  className="link-btn row-name"
                   onClick={() => setSelected(row)}
                   style={{ textAlign: 'left' }}
                 >
@@ -86,11 +85,11 @@ export default function DatabaseView({ tracker, initialSelectedName, onClearInit
         </tbody>
       </table>
 
-      <CandidateDetail 
-        candidate={selected} 
-        onClose={() => setSelected(null)} 
-        token={token} 
-        refreshData={refreshData} 
+      <CandidateDetail
+        candidate={selected}
+        onClose={() => setSelected(null)}
+        token={token}
+        refreshData={refreshData}
       />
     </div>
   );
