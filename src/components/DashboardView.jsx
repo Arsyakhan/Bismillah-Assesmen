@@ -1,5 +1,6 @@
 import React from 'react';
 import { statusClass, formatPercent } from '../utils.js';
+import AnimatedNumber from './AnimatedNumber.jsx';
 
 export default function DashboardView({ dashboard, onSelectCandidate }) {
   if (!dashboard) return null;
@@ -22,23 +23,25 @@ export default function DashboardView({ dashboard, onSelectCandidate }) {
       {stats && (
         <div className="stat-row">
           <div className="stat-card">
-            <div className="stat-value">{stats.totalKandidat}</div>
+            <div className="stat-value"><AnimatedNumber value={stats.totalKandidat} /></div>
             <div className="stat-label">Total kandidat</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{stats.selesai}</div>
+            <div className="stat-value"><AnimatedNumber value={stats.selesai} /></div>
             <div className="stat-label">Selesai</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{stats.sedangBerjalan}</div>
+            <div className="stat-value"><AnimatedNumber value={stats.sedangBerjalan} /></div>
             <div className="stat-label">Sedang berjalan</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{stats.belumMulai}</div>
+            <div className="stat-value"><AnimatedNumber value={stats.belumMulai} /></div>
             <div className="stat-label">Belum mulai</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{formatPercent(stats.rataRataProgres)}</div>
+            <div className="stat-value">
+              <AnimatedNumber value={Math.round((stats.rataRataProgres || 0) * 100)} suffix="%" />
+            </div>
             <div className="stat-label">Rata-rata progres</div>
           </div>
         </div>
@@ -72,10 +75,10 @@ export default function DashboardView({ dashboard, onSelectCandidate }) {
             </tr>
           </thead>
           <tbody>
-            {candidates.map((c) => {
+            {candidates.map((c, i) => {
               const dynamicStatus = getDynamicStatus(c.progres);
               return (
-                <tr key={c.no}>
+                <tr key={c.no} className="row-enter" style={{ animationDelay: `${Math.min(i * 25, 300)}ms` }}>
                   <td>{c.no}</td>
                   <td>
                     <button className="link-btn" onClick={() => onSelectCandidate(c.nama)}>
