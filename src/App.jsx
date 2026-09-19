@@ -5,7 +5,7 @@ import Sidebar from './components/Sidebar.jsx';
 import DashboardView from './components/DashboardView.jsx';
 import DatabaseView from './components/DatabaseView.jsx';
 import AllocationView from './components/AllocationView.jsx';
-import { fetchData } from './api.js';
+import { fetchData, logout } from './api.js';
 
 const POLL_INTERVAL_MS = 120000;
 
@@ -55,11 +55,14 @@ export default function App() {
   }, [token]);
 
   function handleLogout() {
+    const currentToken = token;
     sessionStorage.removeItem('ltk_token');
     sessionStorage.removeItem('ltk_editor_name');
     setToken(null);
     setData(null);
     setError('');
+    // Kirim ke server di belakang layar, tidak perlu ditunggu (UI sudah logout duluan).
+    if (currentToken) logout(currentToken).catch(() => {});
   }
 
   if (!token) return <Login onSuccess={setToken} />;
