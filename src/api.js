@@ -1,41 +1,96 @@
+// src/api.js — GANTI SELURUH ISI FILE INI
 const BASE_URL = import.meta.env.VITE_APPS_SCRIPT_URL;
+const REQUEST_TIMEOUT_MS = 20000;
+const RETRY_ATTEMPTS = 3;
 
 if (!BASE_URL) {
   console.warn('VITE_APPS_SCRIPT_URL belum diatur.');
 }
 
-async function callApiGet(params) {
-  const url = new URL(BASE_URL);
-  Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error || 'Server error');
-  return json;
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Apps Script kadang membalas gagal sesaat (cold start / redeploy).
+// Untuk request baca (idempotent) kita coba ulang dengan backoff sebelum
+// benar-benar dianggap gagal.
+async function withRetry(fn, attempts = RETRY_ATTEMPTS) {
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i === attempts - 1 || err.retryable === false) throw err;
+      await sleep(500 * 2 ** i + Math.random() * 200);
+    }
+  }
+  throw lastError;
+}
+
+async function callApiGet(params, { retry = false } = {}) {
+  const run = async () => {
+    const url = new URL(BASE_URL);
+    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+
+    let res;
+    try {
+      res = await fetchWithTimeout(url.toString());
+    } catch (networkErr) {
+      const e = new Error('Tidak bisa menghubungi server (jaringan lambat/timeout).');
+      e.retryable = true;
+      throw e;
+    }
+    if (!res.ok) {
+      const e = new Error(`HTTP Error ${res.status}`);
+      e.retryable = [404, 429, 500, 502, 503, 504].includes(res.status);
+      throw e;
+    }
+    const json = await res.json();
+    if (!json.success) {
+      const e = new Error(json.error || 'Server error');
+      e.retryable = false;
+      throw e;
+    }
+    return json;
+  };
+  return retry ? withRetry(run) : run();
 }
 
 async function callApiPost(params) {
   const formData = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => formData.append(key, value));
-  const res = await fetch(BASE_URL, { method: 'POST', body: formData });
-  if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+  let res;
+  try {
+    res = await fetchWithTimeout(BASE_URL, { method: 'POST', body: formData });
+  } catch (networkErr) {
+    throw new Error('Tidak bisa menghubungi server (jaringan lambat/timeout). Coba lagi.');
+  }
+  if (!res.ok) throw new Error(`HTTP Error ${res.status}. Coba lagi sebentar lagi.`);
   const json = await res.json();
   if (!json.success) throw new Error(json.error || 'Server error');
   return json;
 }
 
-// Login sekarang lewat POST — password tidak lagi muncul di URL.
 export function login(password) {
   return callApiPost({ action: 'login', password });
 }
 
-// Baca data tetap lewat GET (read-only, tidak berisiko seperti update).
+// Baca data: retry otomatis, aman karena read-only.
 export function fetchData(token) {
-  return callApiGet({ action: 'data', token });
+  return callApiGet({ action: 'data', token }, { retry: true });
 }
 
-// Update HANYA lewat POST. Tidak ada lagi fallback ke GET —
-// backend sudah sengaja menolak action=update lewat GET.
 export async function updateDataToSheet(token, sheetName, keyColumn, keyValue, updateData) {
   const editorName = sessionStorage.getItem('ltk_editor_name') || '';
   return callApiPost({
