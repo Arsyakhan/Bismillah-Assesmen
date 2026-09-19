@@ -1,3 +1,4 @@
+// src/components/CandidateDetail.jsx — GANTI SELURUH ISI FILE INI
 import React, { useState, useEffect } from 'react';
 import { FIELD_GROUPS } from '../fieldGroups.js';
 import { statusClass, formatPercent } from '../utils.js';
@@ -50,6 +51,14 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
             <p className="drawer-sub">
               {candidate['Fakultas']} · {candidate['Jurusan']} · Angkatan {candidate['Angkatan']}
             </p>
+            {(candidate['Diubah Oleh'] || candidate['Diubah Pada']) && (
+              <p className="drawer-audit no-print">
+                Terakhir diubah oleh <strong>{candidate['Diubah Oleh'] || '—'}</strong>
+                {candidate['Diubah Pada']
+                  ? ` pada ${new Date(candidate['Diubah Pada']).toLocaleString('id-ID')}`
+                  : ''}
+              </p>
+            )}
           </div>
           <div className="no-print drawer-header-actions">
             {!isEditing && (
