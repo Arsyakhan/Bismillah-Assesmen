@@ -2,18 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { FIELD_GROUPS } from '../fieldGroups.js';
 import { statusClass, formatPercent } from '../utils.js';
-import { updateDataToSheet } from '../api.js';
+import { updateDataToSheet, fetchData } from '../api.js';
 import Toast from './Toast.jsx';
 
 export default function CandidateDetail({ candidate, onClose, token, refreshData }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [originalEditedAt, setOriginalEditedAt] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (candidate) {
       setFormData({ ...candidate });
+      setOriginalEditedAt(candidate['Diubah Pada'] || null);
       setIsEditing(false);
     }
   }, [candidate]);
@@ -25,6 +27,39 @@ export default function CandidateDetail({ candidate, onClose, token, refreshData
 
   const handleSave = async () => {
     setIsSaving(true);
+
+    // Cek dulu apakah data ini sudah diubah orang lain sejak drawer dibuka,
+    // supaya tidak diam-diam menimpa pekerjaan asesor lain.
+    try {
+      const fresh = await fetchData(token);
+      const freshRow = fresh.data.tracker.find((r) => String(r['No']) === String(candidate['No']));
+      const freshEditedAt = freshRow ? freshRow['Diubah Pada'] : null;
+      const changedSinceOpen =
+        originalEditedAt &&
+        freshEditedAt &&
+        new Date(freshEditedAt).getTime() !== new Date(originalEditedAt).getTime();
+
+      if (changedSinceOpen) {
+        const who = freshRow['Diubah Oleh'] || 'orang lain';
+        const when = new Date(freshEditedAt).toLocaleString('id-ID');
+        const proceed = window.confirm(
+          `Data kandidat ini sudah diubah oleh ${who} pada ${when}, setelah kamu membuka form ini.\n\n` +
+          `Klik OK untuk tetap menyimpan dan menimpa perubahan itu, atau Cancel untuk membatalkan dan memuat data terbaru.`
+        );
+        if (!proceed) {
+          setIsSaving(false);
+          setIsEditing(false);
+          setToast({ type: 'error', message: 'Penyimpanan dibatalkan. Memuat data terbaru…' });
+          if (refreshData) refreshData();
+          return;
+        }
+      }
+    } catch (checkErr) {
+      // Kalau pengecekan konflik gagal (mis. jaringan lambat), jangan blokir user —
+      // tetap lanjut simpan seperti biasa.
+      console.warn('Gagal memeriksa konflik edit:', checkErr.message);
+    }
+
     try {
       const dataToSave = { ...formData };
       delete dataToSave['Progres (%)'];
