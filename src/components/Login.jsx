@@ -1,12 +1,19 @@
+// src/components/Login.jsx — GANTI SELURUH ISI FILE INI
 import React, { useState } from 'react';
 import { login } from '../api.js';
 
+const ASESOR_NAMES = ['Syafiq', 'Razan', 'Taqiy', 'Qonita', 'Muflih', 'Ruben', 'Lainnya (isi manual)'];
+
 export default function Login({ onSuccess }) {
-  const [name, setName] = useState('');
+  const [selectedName, setSelectedName] = useState('');
+  const [customName, setCustomName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const isCustom = selectedName === 'Lainnya (isi manual)';
+  const finalName = isCustom ? customName.trim() : selectedName;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -15,7 +22,7 @@ export default function Login({ onSuccess }) {
     try {
       const result = await login(password);
       sessionStorage.setItem('ltk_token', result.token);
-      sessionStorage.setItem('ltk_editor_name', name.trim());
+      sessionStorage.setItem('ltk_editor_name', finalName);
       onSuccess(result.token);
     } catch (err) {
       setError(err.message);
@@ -33,16 +40,30 @@ export default function Login({ onSuccess }) {
 
         <form onSubmit={handleSubmit}>
           <label htmlFor="name">Nama kamu</label>
-          <input
+          <select
             id="name"
-            type="text"
-            autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nama asesor (untuk catatan siapa yang mengedit)"
+            value={selectedName}
+            onChange={(e) => setSelectedName(e.target.value)}
             required
-            style={{ width: '100%', marginBottom: '18px', boxSizing: 'border-box' }}
-          />
+            style={{ width: '100%', marginBottom: isCustom ? '12px' : '18px', boxSizing: 'border-box' }}
+          >
+            <option value="" disabled>Pilih namamu…</option>
+            {ASESOR_NAMES.map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+
+          {isCustom && (
+            <input
+              type="text"
+              autoFocus
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder="Ketik namamu"
+              required
+              style={{ width: '100%', marginBottom: '18px', boxSizing: 'border-box' }}
+            />
+          )}
 
           <label htmlFor="password">Password tim</label>
           <div style={{ position: 'relative', display: 'block', width: '100%', marginBottom: '18px' }}>
@@ -84,7 +105,7 @@ export default function Login({ onSuccess }) {
             </button>
           </div>
 
-          <button type="submit" disabled={loading || !password || !name.trim()}>
+          <button type="submit" disabled={loading || !password || !finalName}>
             {loading ? 'Memeriksa…' : 'Masuk'}
           </button>
         </form>
