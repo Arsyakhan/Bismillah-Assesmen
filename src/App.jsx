@@ -36,7 +36,6 @@ export default function App() {
       } else if (initial) {
         setError(err.message);
       } else {
-        // Refresh berkala gagal -> tetap pakai data lama, jangan bikin panik.
         console.warn('Sync gagal, tetap pakai data terakhir:', err.message);
         setError(err.message);
       }
