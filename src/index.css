@@ -1175,3 +1175,56 @@ button {
   color: var(--ink-soft);
   margin: 8px 0 20px;
 }
+/* --- Fix: elemen baru (filter/sync/pagination) belum ke-hide saat print --- */
+@media print {
+  .sync-bar,
+  .filter-bar,
+  .filter-result-count,
+  .pagination-bar,
+  .skeleton-wrap {
+    display: none !important;
+  }
+}
+
+/* --- Session expiry warning --- */
+.state-message-warning {
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  color: #874d00;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* --- Loading skeleton --- */
+.skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.skeleton-stat-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.skeleton-block {
+  background: linear-gradient(90deg, var(--line) 25%, var(--paper-card) 50%, var(--line) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+  border-radius: var(--radius);
+}
+.skeleton-stat-card {
+  height: 76px;
+}
+.skeleton-table {
+  height: 44px;
+}
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (max-width: 860px) {
+  .skeleton-stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
