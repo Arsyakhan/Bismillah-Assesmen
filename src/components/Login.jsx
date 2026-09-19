@@ -23,6 +23,10 @@ export default function Login({ onSuccess }) {
       const result = await login(password);
       sessionStorage.setItem('ltk_token', result.token);
       sessionStorage.setItem('ltk_editor_name', finalName);
+      sessionStorage.setItem(
+        'ltk_token_expires_at',
+        String(Date.now() + (result.expiresInSeconds || 21600) * 1000)
+      );
       onSuccess(result.token);
     } catch (err) {
       setError(err.message);
