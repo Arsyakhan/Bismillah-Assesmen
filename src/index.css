@@ -1101,3 +1101,77 @@ button {
   gap: 12px;
   margin-bottom: 16px;
 }
+/* --- Tambahan: filter bar, pagination, error boundary --- */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.filter-bar .table-search {
+  flex: 1;
+  min-width: 220px;
+  margin-bottom: 0;
+}
+.filter-select {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 14px;
+  background: var(--paper-card);
+  color: var(--ink);
+}
+.filter-result-count {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+.table-empty-row {
+  text-align: center;
+  color: var(--ink-soft);
+  padding: 24px 12px;
+}
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+.pagination-label {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.login-card select {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 15px;
+  background: var(--paper);
+}
+.error-boundary-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy-deep);
+  padding: 24px;
+}
+.error-boundary-card {
+  max-width: 420px;
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+}
+.error-boundary-card h2 {
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+.error-boundary-hint {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 8px 0 20px;
+}
