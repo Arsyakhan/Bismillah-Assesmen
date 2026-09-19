@@ -8,6 +8,8 @@ import AllocationView from './components/AllocationView.jsx';
 import { fetchData, logout } from './api.js';
 
 const POLL_INTERVAL_MS = 120000;
+const SESSION_CHECK_INTERVAL_MS = 30000;
+const SESSION_WARNING_THRESHOLD_MS = 5 * 60 * 1000; // 5 menit
 
 export default function App() {
   const [token, setToken] = useState(() => sessionStorage.getItem('ltk_token'));
@@ -18,6 +20,7 @@ export default function App() {
   const [syncing, setSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState(null);
   const [pendingCandidateName, setPendingCandidateName] = useState(null);
+  const [sessionWarningMinutes, setSessionWarningMinutes] = useState(null);
   const isFetchingRef = useRef(false);
 
   const loadData = async ({ initial = false } = {}) => {
@@ -54,14 +57,39 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // Cek waktu kedaluwarsa sesi tiap 30 detik, tampilkan peringatan 5 menit sebelum habis.
+  useEffect(() => {
+    if (!token) return;
+    const checkExpiry = () => {
+      const expiresAtRaw = sessionStorage.getItem('ltk_token_expires_at');
+      if (!expiresAtRaw) {
+        setSessionWarningMinutes(null);
+        return;
+      }
+      const remaining = Number(expiresAtRaw) - Date.now();
+      if (remaining <= 0) {
+        handleLogout();
+      } else if (remaining <= SESSION_WARNING_THRESHOLD_MS) {
+        setSessionWarningMinutes(Math.max(1, Math.ceil(remaining / 60000)));
+      } else {
+        setSessionWarningMinutes(null);
+      }
+    };
+    checkExpiry();
+    const intervalId = setInterval(checkExpiry, SESSION_CHECK_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   function handleLogout() {
     const currentToken = token;
     sessionStorage.removeItem('ltk_token');
     sessionStorage.removeItem('ltk_editor_name');
+    sessionStorage.removeItem('ltk_token_expires_at');
     setToken(null);
     setData(null);
     setError('');
-    // Kirim ke server di belakang layar, tidak perlu ditunggu (UI sudah logout duluan).
+    setSessionWarningMinutes(null);
     if (currentToken) logout(currentToken).catch(() => {});
   }
 
@@ -84,7 +112,13 @@ export default function App() {
           </button>
         </div>
 
-        {loading && !data && <p className="state-message">Memuat data…</p>}
+        {sessionWarningMinutes !== null && (
+          <p className="state-message state-message-warning">
+            Sesi kamu akan berakhir dalam ~{sessionWarningMinutes} menit. Segera simpan perubahan yang sedang dikerjakan, lalu login ulang.
+          </p>
+        )}
+
+        {loading && !data && <DashboardSkeleton />}
         {error && !data && <p className="state-message">{error}</p>}
         {error && data && (
           <p className="state-message state-message-warning">
@@ -116,6 +150,21 @@ export default function App() {
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="skeleton-wrap">
+      <div className="skeleton-stat-row">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="skeleton-block skeleton-stat-card" />
+        ))}
+      </div>
+      <div className="skeleton-block skeleton-table" />
+      <div className="skeleton-block skeleton-table" />
+      <div className="skeleton-block skeleton-table" />
     </div>
   );
 }
