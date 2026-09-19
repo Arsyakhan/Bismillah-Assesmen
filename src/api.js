@@ -21,9 +21,6 @@ async function fetchWithTimeout(url, options = {}) {
   }
 }
 
-// Apps Script kadang membalas gagal sesaat (cold start / redeploy).
-// Untuk request baca (idempotent) kita coba ulang dengan backoff sebelum
-// benar-benar dianggap gagal.
 async function withRetry(fn, attempts = RETRY_ATTEMPTS) {
   let lastError;
   for (let i = 0; i < attempts; i++) {
@@ -89,6 +86,11 @@ export function login(password) {
 // Baca data: retry otomatis, aman karena read-only.
 export function fetchData(token) {
   return callApiGet({ action: 'data', token }, { retry: true });
+}
+
+// Matikan token di server saat user klik "Keluar".
+export function logout(token) {
+  return callApiPost({ action: 'logout', token });
 }
 
 export async function updateDataToSheet(token, sheetName, keyColumn, keyValue, updateData) {
