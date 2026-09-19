@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+// src/App.jsx — GANTI SELURUH ISI FILE INI
+import React, { useEffect, useRef, useState } from 'react';
 import Login from './components/Login.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import DashboardView from './components/DashboardView.jsx';
@@ -6,41 +7,50 @@ import DatabaseView from './components/DatabaseView.jsx';
 import AllocationView from './components/AllocationView.jsx';
 import { fetchData } from './api.js';
 
+const POLL_INTERVAL_MS = 120000;
+
 export default function App() {
   const [token, setToken] = useState(() => sessionStorage.getItem('ltk_token'));
   const [page, setPage] = useState('dashboard');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSynced, setLastSynced] = useState(null);
   const [pendingCandidateName, setPendingCandidateName] = useState(null);
+  const isFetchingRef = useRef(false);
 
-  const loadData = () => {
-    if (!token) return;
-    fetchData(token)
-      .then((res) => setData(res.data))
-      .catch((err) => {
+  const loadData = async ({ initial = false } = {}) => {
+    if (!token || isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (initial) setLoading(true);
+    setSyncing(true);
+    try {
+      const res = await fetchData(token);
+      setData(res.data);
+      setLastSynced(new Date());
+      setError('');
+    } catch (err) {
+      if (err.message.toLowerCase().includes('sesi')) {
+        handleLogout();
+      } else if (initial) {
         setError(err.message);
-        if (err.message.toLowerCase().includes('sesi')) handleLogout();
-      });
+      } else {
+        // Refresh berkala gagal -> tetap pakai data lama, jangan bikin panik.
+        console.warn('Sync gagal, tetap pakai data terakhir:', err.message);
+        setError(err.message);
+      }
+    } finally {
+      isFetchingRef.current = false;
+      setSyncing(false);
+      if (initial) setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (!token) return;
-    setLoading(true);
-    setError('');
-
-    // Tarikan pertama saat web dibuka
-    fetchData(token)
-      .then((res) => setData(res.data))
-      .catch((err) => {
-        setError(err.message);
-        if (err.message.toLowerCase().includes('sesi')) handleLogout();
-      })
-      .finally(() => setLoading(false));
-
-    // SOLUSI 404: Auto-refresh diperlambat menjadi 2 Menit (120000 ms)
-    // agar tidak menumpuk dan membuat URL Google expired.
-    const intervalId = setInterval(loadData, 120000);
+    loadData({ initial: true });
+    const intervalId = setInterval(() => loadData(), POLL_INTERVAL_MS);
     return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
@@ -50,6 +60,7 @@ export default function App() {
     sessionStorage.removeItem('ltk_editor_name');
     setToken(null);
     setData(null);
+    setError('');
   }
 
   if (!token) return <Login onSuccess={setToken} />;
@@ -58,8 +69,27 @@ export default function App() {
     <div className="app-shell">
       <Sidebar active={page} onNavigate={setPage} onLogout={handleLogout} />
       <main className="main">
+        <div className="sync-bar">
+          <span className="sync-status">
+            {syncing
+              ? 'Menyinkronkan…'
+              : lastSynced
+              ? `Tersinkron ${lastSynced.toLocaleTimeString('id-ID')}`
+              : ''}
+          </span>
+          <button className="btn btn-sm btn-ghost" onClick={() => loadData()} disabled={syncing}>
+            Refresh sekarang
+          </button>
+        </div>
+
         {loading && !data && <p className="state-message">Memuat data…</p>}
-        {error && <p className="state-message">{error}</p>}
+        {error && !data && <p className="state-message">{error}</p>}
+        {error && data && (
+          <p className="state-message state-message-warning">
+            Sinkronisasi terakhir gagal ({error}). Menampilkan data terakhir yang berhasil dimuat.
+          </p>
+        )}
+
         {data && (
           <>
             {page === 'dashboard' && (
